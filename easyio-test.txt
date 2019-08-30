@@ -1,0 +1,66 @@
+//We use apache test bench to test
+//install apache2
+//sudo apt-get update
+//sudo apt-get install apache2
+//cd /etc/apache2/ports.conf
+//Listen 8000         ===> change to port 8000
+//sudo service apache2 status
+//sudo service apache2 stop
+//sudo service apache2 start
+
+//ab to launch test
+ab -c 40 -n 1000 http://192.168.1.104/
+
+This is ApacheBench, Version 2.3 <$Revision: 1807734 $>
+Copyright 1996 Adam Twiss, Zeus Technology Ltd, http://www.zeustech.net/
+Licensed to The Apache Software Foundation, http://www.apache.org/
+
+Benchmarking 192.168.1.104 (be patient)
+Completed 100 requests
+Completed 200 requests
+Completed 300 requests
+Completed 400 requests
+Completed 500 requests
+Completed 600 requests
+Completed 700 requests
+Completed 800 requests
+Completed 900 requests
+Completed 1000 requests
+Finished 1000 requests
+
+
+Server Software:        nginx/1.14.0
+Server Hostname:        192.168.1.104
+Server Port:            80
+
+Document Path:          /
+Document Length:        842 bytes
+
+Concurrency Level:      40
+Time taken for tests:   1.831 seconds          //time to complete
+Complete requests:      1000
+Failed requests:        0
+Total transferred:      1084000 bytes
+HTML transferred:       842000 bytes
+Requests per second:    546.03 [#/sec] (mean)
+Time per request:       73.256 [ms] (mean)
+Time per request:       1.831 [ms] (mean, across all concurrent requests)
+Transfer rate:          578.03 [Kbytes/sec] received
+
+Connection Times (ms)
+              min  mean[+/-sd] median   max
+Connect:        5   36   7.8     36      61
+Processing:    20   36   7.1     35      61
+Waiting:       20   36   7.1     35      61
+Total:         47   72  10.1     71     105
+
+Percentage of the requests served within a certain time (ms)
+  50%     71
+  66%     74
+  75%     76
+  80%     79
+  90%     87
+  95%     91
+  98%    102
+  99%    104
+ 100%    105 (longest request)

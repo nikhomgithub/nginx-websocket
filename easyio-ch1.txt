@@ -1,0 +1,515 @@
+https://www.youtube.com/watch?v=1OU5ngq-WyM&list=PLQlWzK5tU-gDyxC1JTpyC2avvJlt3hrIh&index=1
+https://github.com/Juriy/easyio
+
+ch01 : DigitalOcean setup
+
+At server
+    Cloud Service : provide load balancing, database, (good for large scale application)
+        Amazon web service (AWS)
+        Microsoft Azure
+        Google Cloud Platform
+    
+    IaaS : Infrastructure as service (good for medium/small application), easy to start ,cheap price, free to install any software, 
+        digitalOcean
+        linode
+        Amazon Ligtsail
+
+    Paas : Platform as a service (only for nodejs, not for db or any other softwares)
+        heroku
+        nodejitsu
+        platform.sh
+
+Apply  DigitalOcean
+https://www.digitalocean.com/?refcode=e79071ae6b49&utm_campaign=Referral_Invite&utm_medium=Referral_Program&utm_source=CopyPaste
+At digitalOcean
+    1. Create Account + Login
+    2. create Droplet 
+        (  choose os (centOS), choose size(5-10$/month), choose data center location (singapore)  )
+    3. Add New SSH KEY (get frome your local machine ~/.ssh/id_rsa.pub) + input your name (as root user)
+    4. choose name of your droplist =root1 (host name)
+    5. create - to dowload/set up server
+    6. copy ip address of droplist
+    7. $ssh root1@192.168.1.104   to remote to server from local machine
+    9. update your server
+       #yum -y update (centos) , #npm apt-get update(ubuntu)
+    10. #yum -y groupinstall "Development Tools"  --> to install all software for node js
+    11. #yum -y install vim net-tools     -> for edit text, network monitor 
+
+----------------------------------
+----------------------------------
+----------------------------------
+
+Ch2
+    Install nodeJS on Server
+At Server
+    1. install nodeJs
+        $sudo apt-get install nodejs (ubuntu)
+        $node -v (ubuntu)
+        $npm -v (ubuntu)
+        $npm install -g pm2 http-server
+
+        test http-server
+        $echo "Hello World" > index.html
+        $http-server                    Show ip address+port of http-server    
+        Go to chrome and check ipaddress+port+"Hello World" above          
+
+----------------------------------
+----------------------------------
+----------------------------------
+
+ch3
+    Create Non-Root User
+At Server
+        $adduser nikhom
+        $usermod -aG wheel nikhom (to make nikhom as Admin)
+        $sudo su nikhom
+        $whoami
+        $cd ~
+        $mkdir .ssh
+        $chmod 700 .ssh
+        $touch .ssh/authorized_keys
+        $chmod 600 .ssh/authorized_keys
+At local machine
+        $cat ~/.ssh/id_rsa.pub   //copy public-key 
+At server
+        $nano .ssh/authorized_keys
+        and paste public-key ans save file
+        ctrl d  to logout from server
+At local machine
+        $ssh nikhom@192.168.1.104    //to login to server
+
+
+----------------------------------
+----------------------------------
+----------------------------------
+
+ch4
+    Use NodeJs with pm2
+At Server
+    $git clone https://github.com/Juriy/easyio.git
+    $cd easyio
+    $sudo npm install
+    $sudo npm start    // to run application  >> test by Chrome
+        However , node application will close if we close terminal in local machine 
+    $pm2 start --easyio main.js    //to run node with pm2    >> close terminam & test by Chrome
+    
+    Set pm2 as auto run by systemd
+    $sudo su
+    #pm2 startup systemd -u nikhom --hp /home/nikhom/ 
+        //ask pm2 to startup with systemd (of centOS) uder nikhom user and have home as /home/nikhom/
+    #sudo su nikhom
+    $pm2 ls     //to check online process
+    $pm2 save   //to save current status of pm2 , and next time pm2 auto-start, it will run easy as pm2 save
+    $reboot
+
+    $pm2 stop all
+    $pm2 start all
+----------------------------------
+----------------------------------
+----------------------------------
+
+ch5 : Bash Script from client to server
+      Automated nodejs deployment
+
+    // previously we manually set up server on user nikhom bash
+    // we can make shell script to automate that process
+
+    At local machine
+        $touch deploy.js
+        $chmod +x deploye.js
+        $vim deploy.js
+            #!/bin/bash
+            tar czf easyio.tar.gz  main.js package.json yarn.lock pyblic LICENSE
+            scp easyio.tar.gz nikhom@188.166.227.208:~
+            rm easyio.tar.gz
+
+            ssh nikhom@188.166.227.208 << 'ENDSSH'   //mean below command belong to server not local machine
+            pm2 stop   //to make sure previous pm2 stop
+            rm -rf easyio   //to make sure previous easyio is deleted , we will install new one
+            mkdir easyio
+            tar xf easyio.tar.gz -C easyio 
+            rm easyio.tar.gz
+            cd easyio
+            yarn install
+            pm2 start easyio
+            ENDSSH
+
+        $./deploy.sh
+
+        //mean we create shell script "deploy.js" to run automatically 
+
+----------------------------------
+----------------------------------
+----------------------------------
+
+ch6
+    Get DNS for DigitalOcean
+    get from https://th.godaddy.com or https://www.youtube.com/watch?v=Pv9u0XkZZ5o
+    
+    Link DNS with digitalOcean IP address or Host Name(Droplet)
+    At digitalOcean (networking)
+        add domain DNS with digitalOcean host name (droplet)
+        
+At local machine
+    $ping dnsname
+
+----------------------------------
+----------------------------------
+----------------------------------
+
+ch7 
+    NGINX technology
+
+                                        ==========> public/static 
+                                       ||            (root)
+                                       ||
+                                       ||           ====> NodeJS (localhost:9000)
+client ==HTTPS==>digitalOcean =====>  NGINX == L.B. ====> NodeJS (localhost:9001)
+                  188.166.227.208   localhost:80    ====> NodeJS (localhost:9002)        
+
+
+port 1 - 1024 are previlage port just for root user                      
+
+----------------------------------
+----------------------------------
+----------------------------------
+
+ch8 
+    Network Interface
+
+One machine can have many interfaces, 
+we can see interface by
+$ ifconfig
+    Normal interface
+    0.0.0.0               ==> allow all user from all interface to access
+                              Not to set your application here (not secure)
+    127.0.0.1(localhost)  ==> Loop-Back interface 
+                              Normally we put application here
+    192.168.1.104         ==> network from wifi (for example)
+    192.168.2.104         ==> network from LAN (for example)
+
+$netstat -tnpl
+   Proto Recv-Q Send-Q Local Address           Foreign Address         State       PID/Program name    
+   tcp        0      0 0.0.0.0:9000            0.0.0.0:*               LISTEN      1322/node /home/nik 
+
+$kill -9 1322
+   //to kill 1322 PID
+
+----------------------------------
+----------------------------------
+----------------------------------
+
+ch9  
+    SElinux
+
+    Some linux block nginx to connect to root or node application
+
+At server    
+    $sudo su
+    #getenforce       //To chek SElinux mode
+        Enforcing   = enable (see log) + enforcing (block access to root or node application)
+        Permissive  = enalbe (see log) + not enforcing (allow to access)
+        Disable     = SElinux is disabled ( no log, no block access)
+
+    #setenforce 1   //set to Enforcing
+    #setenforce 0   //set to Permissive    
+    
+
+   to see DAC (Discretionary Access Control) = 
+    $cd /home/nikhom/easyio/public
+    $ls -l
+    -rw-rw-r-- 1 nikhom nikhom  367 Apr 22 08:01 index.html
+
+    $ls -lZ 
+    -rw-rw-r-- 1 nikhom nikhom system_u:object_r:user_home_t:s0 367 Apr 22 08:01 index.html
+    
+    DAC = system_u:object_r:user_home_t:s0 
+
+    For nginx
+    $ps -auxZ | grep nginx
+        system_u:system_r:http_t:s0  nginx
+    Let change set up
+    $sudo su
+    #setsebool -P httpd_can_network_connect on    //set nginx to connect to backend
+    #setsebool -P httpd_enable_homedirs on        //set nginx to access /home/nikhom
+    #chcon -Rt httpd_sys_content_t /home/nikhom/easyio/public/     //set nginx to read file in /home/nikhom
+    #ls -lZ /home/nikhom/easyio/public/
+    -rw-rw-r-- 1 nikhom nikhom unconfied_u:object_r:http_sys_content_t:s0 367 Apr 22 08:01 index.html
+
+----------------------------------
+----------------------------------
+----------------------------------
+
+ch10 
+    Install & config nginx
+
+At server
+    $sudo apt-get update
+    $sudo apt-get install nginx 
+    
+    #systemctl enable nginx  // systemd will auto start nginx when reboot
+    #reboot 
+
+    For ubuntu
+    #service nginx start  
+    #service nginx stop 
+    #service nginx status
+    #service nginx restart        //stop + start
+    #service nginx reload         //stop + reload conf + start
+    For centos/ubuntu
+    #systemctl start nginx
+    #systemctl stop nginx
+    #systemctl status nginx 
+    #systemctl restart nginx      //stop + start
+    #systemctl reload nginx       //stop + reload conf + start
+    config nginx
+
+    #cd /etc/nginx/sites-enabled   //
+    #nano default                  // config as below
+    #nginx -t                      // to test config file ok or not 
+
+----------------------------------
+----------------------------------
+----------------------------------
+
+ch11
+    Websocket with Nginx
+    Header Type
+        End to End --> From client to server
+        Hop by Hop --> From client to Nginx to Server 
+            Header of Hop by Hop
+                -Connection (problem), Keep-Alive, Public, Proxy-Authenticate, Transfer-Encoding, Upgrade (problem)
+        We need to config Connection & Upgrade 
+
+    #cd /etc/nginx/sites-enabled   //
+    #nano default                  // config as below
+
+        //by adding 
+
+    location /socket.io/ {
+		proxy_http_version 1.1;                               
+		proxy_set_header Upgrade $http_upgrade;
+		proxy_set_header Connection "upgrade";
+		proxy_pass http://project/socket.io/;
+		#proxy_pass http://127.0.0.1:9000/socket.io/;
+	}	
+    #nginx -t                      // to test config file ok or not 
+    #service nginx restart
+ 
+----------------------------------
+----------------------------------
+----------------------------------
+
+ch12
+    Reverse Proxy 
+    
+    #cd /etc/nginx/sites-enabled   //
+    #nano default                  // config as below
+    
+    proxy_set_header Host $http_host;                             //set host to be server ip
+    proxy_set_header X-Real-IP $remote_addr;                      //to show client IP
+	proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;  //to show client IP
+
+----------------------------------
+----------------------------------
+----------------------------------
+
+ch13
+    Serve statick file by NGINX (not node application)
+
+    check access right
+    #namei -om /home/nikhom/easyio/public/
+        drwxr-xr-x root   root   /
+        drwxr-xr-x root   root   home
+        drwxr-xr-x nikhom nikhom nikhom
+        drwxr-xr-x nikhom nikhom   easyio
+        drwxr-xr-x nikhom nikhom   public
+
+    give permmission to exec to nginx group
+
+    #chown nikhom:nginx /home/nikhom
+    #chmod g+x /home/nikhom/
+        drwxr-xr-x root   root   /
+        drwxr-xr-x root   root   home
+        drwxr-xr-x nikhom "nginx" nikhom
+        drwxr-xr-x nikhom nikhom   easyio
+        drwxr-xr-x nikhom nikhom   public
+
+    #cd /etc/nginx/sites-enabled   //
+    #nano default                  // config as below
+
+    root /home/nikhom/easyio/server2/public;
+
+	location /api/ {
+		proxy_pass http://project/api/;
+	}
+
+    #service nginx restart
+
+    we can access static file in public folder even node application off
+
+----------------------------------
+----------------------------------
+----------------------------------
+
+ch14  
+    SSL certificate (https)
+    https://www.youtube.com/watch?v=d4QDyHLHZ9c&list=PLQlWzK5tU-gDyxC1JTpyC2avvJlt3hrIh&index=14
+    https://letsencrypt.org/      //certbot belong to letsencrypt
+    https://certbot.eff.org/
+
+    $sudo apt-get install certbot
+    $certbot --version
+
+    $certbot certonly  --standalone -d domainname
+    >nikhom@yahoo.com
+    >yes
+
+    need to save back up certificate
+    $cp /etc/letsencrypt/ /home/nikhom/
+    $tar czf letsencrypt.tar.gz letsencrypt/
+
+    create default by go to https://ssl-config.mozilla.org/
+    select 
+        Nginx, Intermediate, Server Version 1.14.0 
+
+
+    #cd /etc/nginx/sites-enabled   //
+    #nano default                  // config as below
+
+        server {
+            listen 80;
+            listen [::]:80;
+            server_name _;
+            return 301 https://$host$request_uri;      //forward to https
+        }
+
+        server {
+            listen 443 ssl http2;
+            listen [::]:443 ssl http2;
+
+            ssl_certificate /etc/letsencrypt/live/domainname/fullchain.pem;
+            ssl_certificate_key /etc/letsencrypt/live/domainname/privkey.pem;
+            ssl_session_timeout 1d;
+            ssl_session_cache shared:SSL:50m;
+            ssl_session_tickets off;
+            ssl_protocols TLSv1 TLSv1.1 TLSv1.2;
+            ssl_ciphers >>> follow red letter ;
+            
+            ssl_prefer_server_ciphers on;
+
+            add_header Strict-Transport-Security max-age=15768000;
+
+            ssl_stapling on;
+            ssl_stapling_verify on;
+            resolver 8.8.8.8;
+            
+            #copy all root, proxy_set_header, location, error_page here     
+
+        }
+
+
+----------------------------------
+----------------------------------
+----------------------------------
+
+ch15  
+    Load Balance
+
+    leat run multiple node application
+
+At server
+    $pm2 start --name easy1 main.js -- --name easy1 --port 9001;
+    $pm2 start --name easy2 main.js -- --name easy2 --port 9002;
+    $pm2 start --name easy3 main.js -- --name easy3 --port 9003;
+    $pm2 save;
+
+    #cd /etc/nginx/sites-enabled   //
+    #nano default                  // config as below
+
+    upstream project{
+        ip_hash;                //to support socket.io to fix single server connection for handshake
+        server 127.0.0.1:9000;
+        server 127.0.0.1:9001;
+        server 127.0.0.1:9002;
+    }
+
+    location /api/ {
+		proxy_pass http://project/api/;
+	}
+
+----------------------------------
+----------------------------------
+----------------------------------
+
+ch16
+    renew ssl certificate
+
+    #certbot renew 
+    
+    need to save back up certificate
+    $cp /etc/letsencrypt/ /home/nikhom/
+    $tar czf letsencrypt.tar.gz letsencrypt/
+
+----------------------------------
+----------------------------------
+----------------------------------
+
+ch17
+    Build Server
+        Jenkins (java) 
+
+
+    Work follow
+    Dev Workstation Computer ==> Git Hib ==> Build Server +npm install ==> App Server 
+ 
+
+//-------------------------------------------------
+//-------------------------------------------------
+
+upstream project{
+	ip_hash;
+	server 127.0.0.1:9000;
+	server 127.0.0.1:9001;
+	server 127.0.0.1:9002;
+}
+
+server {
+	listen 80;
+
+	#root /var/www/html;                                    ==> default nginx root
+    #index index.html index.htm index.nginx-debian.html;
+	
+    root /home/nikhom/easyio/server2/public;
+	
+	#server_name _;
+
+    proxy_set_header Host $http_host;
+    proxy_set_header X-Real-IP $remote_addr;
+	proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+
+	location /socket.io/ {
+		proxy_http_version 1.1;                               
+		proxy_set_header Upgrade $http_upgrade;
+		proxy_set_header Connection "upgrade";
+		proxy_pass http://project/socket.io/;
+		#proxy_pass http://127.0.0.1:9000/socket.io/;
+	}	
+
+	location /api/ {
+		# try_files $uri $uri/ =404;
+		#proxy_pass http://127.0.0.1:9000/api/;
+		proxy_pass http://project/api/;
+	}
+	
+	location /sanook/ {		 
+		proxy_pass http://www.sanook.com;
+	}
+
+	location /video/ {
+		proxy_pass http://www.youtube.com;
+	} 
+}
+
+//----------------------------------------------
+//---------------------------------------------

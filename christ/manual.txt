@@ -1,0 +1,117 @@
+How to remove nginx
+
+1.sudo apt-get remove --purge nginx*
+
+How to install nginx
+$sudo apt-get update
+$sudo apt-get install nginx 
+
+$nginx -v
+nginx version: nginx/1.14.0 (Ubuntu)
+
+$sudo service nginx start   // run nginx
+$sudo service nginx status  // to see status of nginx (running or dead)
+$sudo service nginx stop    // stop nginx 
+
+
+
+Import file / folder in nginx
+$cd /etc/nginx
+1. nginx.conf 
+2. sites-enabled 
+3. sites-available
+4. conf.d
+=============================
+nginx.conf
+=============================
+user www-data;                                 ==> process owner of nginx
+worker_processes auto;                         ==> how fast/processor to run nginx , to see detail, 
+                                                   $ps aux | grep nginx
+                                                    ps = process, aux = all user exec
+                                                    root      7564  0.0  0.0 141100  1556 ?        Ss   17:52   0:00 nginx: master process /usr/sbin/nginx -g daemon on; master_process on;
+                                                    www-data  7565  0.0  0.1 143776  6312 ?        S    17:52   0:00 nginx: worker process
+                                                    www-data  7566  0.0  0.1 143776  6312 ?        S    17:52   0:00 nginx: worker process
+                                                    www-data  7567  0.0  0.1 143776  6312 ?        S    17:52   0:00 nginx: worker process
+                                                    www-data  7568  0.0  0.1 143776  6312 ?        S    17:52   0:00 nginx: worker process
+                                                    //we have 4 service of nginx running , auto=4 in this case
+                                                   
+                                                   $ grep processor /proc/cpuinfo | wc -l
+                                                   4    //mean we have 4 core of cpu in this machine                     
+
+pid /run/nginx.pid;                             ==> this is process id of nginx 
+include /etc/nginx/modules-enabled/*.conf;
+
+events {
+        worker_connections 768;                 ==> 1 process can handle 768 connection, 4*768 is our capacity now
+                                                    (but linux limt number of file to be opened)
+                                                  ==> multi_accept is off now (never see on)
+}
+
+http {                                          ==> 
+
+
+        sendfile on;                            ==> for send large static file = on 
+        tcp_nopush on;                          ==> for send large static file = on 
+        tcp_nodelay on;                         ==> To ask socket to send data as buffer = on
+        keepalive_timeout 65;                   ==> how long client stay open with server = 65 millisecond
+        types_hash_max_size 2048; 
+
+        
+        include /etc/nginx/mime.types;
+        default_type application/octet-stream;
+
+        ssl_protocols TLSv1 TLSv1.1 TLSv1.2; # Dropping SSLv3, ref: POODLE
+        ssl_prefer_server_ciphers on;
+
+
+        access_log /var/log/nginx/access.log;   ==> access_log location
+        error_log /var/log/nginx/error.log;     ==> error_log location
+
+
+        gzip on;                                ==> to zip file , for large file
+
+
+        include /etc/nginx/conf.d/*.conf;   
+        include /etc/nginx/sites-enabled/*;
+}
+
+
+
+
+=======================================
+new work with folder
+
+sites-available      ==> configure static site 
+========================================
+$cd sites-available
+$ls 
+default 
+
+/etc/nginx/sites-available/default
+=======================
+server {                                            ==> default nginx have only 1 server    
+	listen 80 default_server;                       ===> tel nginx x to listen on port 80 
+	listen [::]:80 default_server;                  ====> ipv 6
+
+
+	root /var/www/html;                            ===> First ..when request come it will look for this folder /var/www/html   
+                                                        $ls /var/www/html
+                                                        index.nginx-debian.html
+
+	index index.html index.htm index.nginx-debian.html;      ==> file that it look for index, index.html .......
+
+	server_name _;                                      ==> request host to this server name   
+                                                            ==> we can change this to our domain name               
+
+	location / {
+		
+		try_files $uri $uri/ =404;                  ==> Second ..after look at first, it look at $uri and look at $uri/  
+                                                                if no match return 404 = page not found 
+	}
+
+        location /images/{                                  ==> go to   http://localhost/images/main.jpg    
+                root /uploads/images;                                   /uploads/images/main.jpg
+        }
+
+}
+

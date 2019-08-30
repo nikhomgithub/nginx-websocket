@@ -1,0 +1,47 @@
+https://www.youtube.com/watch?v=3vMIIekO45k
+
+https://scaleyourcode.com/blog/article/2
+2 way of install on machine
+
+sudo apt-get update
+
+//easy way to install but older version
+sudo apt-get install nginx
+ls /etc/nginx mean the place that store nginx
+
+//sudo apt-get remove --purge nginx* 
+//mean to remove the first one
+
+sudo nano /etc/nginx/nginx.conf
+
+user www-data;     
+mean user of nginx
+
+worker_processes auto;         
+#ps aux | grep nginx  mean to see process running by user of nginx (root,www-data)
+#mean cpu core of machine
+
+grep processor /proc/cpuinfo | wc -l
+
+pid /run/nginx.pid;
+include /etc/nginx/modules-enabled/*.conf;
+
+worker_connections 768; mean max connection of nginx for 1 core, but linux have max limited opened file
+                        
+sendfile on #support sending large static file 
+tcp_nopush on #support sending large static file       
+tcp_nodelay on #support sending with buffer
+keepalive_timeout 65; # mean keep connection alive for 64 second
+access_log /var/log/nginx/access.log; mean keep log
+error_log /var/log/nginx/error.log; mean keep log
+gzip on; mean to zip large file for fast cpu cycle
+
+include /etc/nginx/sites-enabled/*; mean bring our website online 
+
+https://www.youtube.com/watch?v=4R_1muxKJLo
+cd /etc/nginx/sites-available
+nano default
+
+listen 80 default_server; mean ipv4 tell nginx what port and server to listen 
+listen [::]:80 default_server; mean same for ipv6
+
