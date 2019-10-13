@@ -1,26 +1,26 @@
-https://www.youtube.com/watch?v=3vMIIekO45k
+  https://www.youtube.com/watch?v=3vMIIekO45k
 
-https://scaleyourcode.com/blog/article/2
+  https://scaleyourcode.com/blog/article/2
 2 way of install on machine
-
 sudo apt-get update
 
-//easy way to install but older version
+  //easy way to install but older version
 sudo apt-get install nginx
-ls /etc/nginx mean the place that store nginx
-
-//sudo apt-get remove --purge nginx* 
-//mean to remove the first one
+  
+  ls /etc/nginx mean the place that store nginx
+  //sudo apt-get remove --purge nginx* 
+    //mean to remove the first one
 
 sudo nano /etc/nginx/nginx.conf
 
-user www-data;     
-mean user of nginx
+  user www-data;     
+  mean user of nginx
 
 worker_processes auto;         
-#ps aux | grep nginx  mean to see process running by user of nginx (root,www-data)
-#mean cpu core of machine
+  #ps aux | grep nginx  
+      //mean to see process running by user of nginx (root,www-data)
 
+#mean cpu core of machine
 grep processor /proc/cpuinfo | wc -l
 
 pid /run/nginx.pid;
