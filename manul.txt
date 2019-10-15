@@ -63,11 +63,29 @@ linux on server
   
 =============================================
 linux command
-- $shutdown -r now     //to shut down & restart linux
+- $shutdown -r now       //to shut down & restart linux
 - $ping nanogram.io or $ping 188.166.228.208
 - $curl nanogram.io:8181 //to access to application in this interface & port 
-- $netstat -tln        //tcp listenning numberOfip-address
+- $netstat -tln          //tcp listenning numberOfip-address
+- file permision(DAC)        RWX RWX RWX (user, group, everyone)
+- $ls -l                 //to show file permission
+- ps -auxZ | grp nginx   //to show process running by nginx 
+=============================================
+SElinx (Security Advance Linux)
 
+- to block server application to connect to file or another application in the same machine
+- $getenforce      //to check set-up-value of SElinux
+                   //enforcing === enable,enforcing
+                   //permissiv === enable (loggin), not enforcing (block) 
+                   //Disable
+- $ls -lZ /usr/share/nginx/html         //to show SElinux
+                                        //system_u:object_r:httpd_sys_content_t:s0 index.html
+
+- allow nginx server to connect to public/static file or other application 
+  
+  #setsebool -P httpd_can_network_connect on                  //allow http server to connect other backends
+  #setsebool -P httpd_enable_homedirs on                      //allow http server to access user folder
+  #chcon -Rt httpd_sys_content_t /home/nikhom/easyio/public   //allow http server to read file from user folder
 =============================================
 npm/yarn dependency on server
 - #npm install -g pm2 http-server
