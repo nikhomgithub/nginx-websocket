@@ -104,7 +104,8 @@ pm2 command
 - pm2 ls                           //check pm2 status
 - pm2 save                         //save current runing in pm2 , it will automatically run when restart
 - pm2 stop easyio                  //stop easyio
-
+- pm2 stop all                     //staop all app runnig by pm2
+- pm2 status                       //check status of pm2 running  
 =============================================
 nodejs command
 const hostname = process.argv[2] || null       //null = default interface or 0.0.0.0
@@ -159,6 +160,8 @@ at server
   
 - run nginx 
   #systemctl start nginx
+  #systemctl restart nginx
+  #systemctl reboot nginx
   or 
   #service start nginx
   
@@ -167,6 +170,23 @@ at server
   or
   $ sudo update-rc.d -n  nginx defaults
 
+- Check nginx
+  #systemctl status nginx
+
+- Test nginx config  before restart nginx (no down time) 
+  #nginx -t
+  
+  always backup nginx folder 
+- $cp -r /etc/nginx
+- $tar czf nginx.tar.gz nginx/
+- $rm -rf nginx
+
+
+- change group owner of static file to allow nginx to access
+  $namei -om /home/nikhom/easyio/public/         //to check ownership and file permission
+  $chown  nikhom:nginx /home/nikhom/             //change owner for this folder to nginx
+  $chmod  g+x /home/nikho/                       //chage file permission for group to exec    
+  
 ===============================================
 /etc/nginx/nginx.conf
 Nginx can server many server {} by config them in  .conf
@@ -181,13 +201,34 @@ http {
 /etc/nginx/conf.d/nanogram.io.conf
 
 - to setup config file for our nanogram.io server
+- nginx will accept connection from client
+  - reverse proxy to all node app route / to websocket  / to https 
+  - reverse proxy to static file
+  - load balance node app
+ 
 
-server {
-  listen 80;
-  listen [::]:80;
-  server_name 
+server { 
+  listen 80;                                         //nginx server listen at port 80 of ipv4
+  listen [::]:80;                               
+  server_name nanogram.io;                           
   
-  location /{
+  root /home/nikhom/easyio/public                    //http://nanogram.io  
+                                                     //forward to static file such as /buil/ of react app
+                                                     //need to change owner to nginx, and change +x for group  
+  
+  proxy_set_header Host $http_host;                  //client want to connect to ....
+  proxy_set_header X-Real-IP $remote_addr;           //client ip address 
+  proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;   //client ip address
+  
+  location /socker.io/{                              //http://nanogram.io/socket.io/
+   proxy_http_version 1.1;                           //set hop_by_hop header
+   proxy_set_header Upgrade $http_upgrade;
+   proxy_set_header Connection "upgrade";
+   proxy_pass "http://localhost:8080/socket.io/"     //forward to node.js app
+  }
+  
+  location /api/{                                    //http://nanogram.io/api
+    proxy_pass "http://localhost:8080/api/";    //nginx forward to nodejs app server.listen(8080,"127.0.0.1",()=>{})
   }
   
   error_page 404/404.html;
@@ -199,6 +240,14 @@ server {
   }
 
 }
+
+===============================================
+web socket hand-shake
+
+web socket is hop-by-hop Headers   //Header send many time before establich socket connection
+                                     
+===============================================
+ssl certificate for https
 
 
 
