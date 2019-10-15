@@ -34,6 +34,10 @@ linux on server
   $ssh root@188.166.228.208
 - update/upgrade linux
   $yum -y update
+  or
+  $sudo apt-get update
+  $sudo apt-get upgrade
+  
 - install linux-package
   $yum -y groupinstall "Development Tools"
   $yum -y install vim net-tools
@@ -69,7 +73,10 @@ linux command
 - $netstat -tln          //tcp listenning numberOfip-address
 - file permision(DAC)        RWX RWX RWX (user, group, everyone)
 - $ls -l                 //to show file permission
-- ps -auxZ | grp nginx   //to show process running by nginx 
+- $ ps -auxZ | grp nginx   //to show process running by nginx 
+- $grep processor /proc/cpuinfo | wc -l   //to check cpu core of machine
+
+
 =============================================
 SElinx (Security Advance Linux)
 
@@ -92,10 +99,10 @@ npm/yarn dependency on server
 
 =============================================
 pm2 command
-- pm2 startup systemd -u nikhom --hp /home/nikhom     //tell linux to run pm2 as pm2 save at restart
+- pm2 startup systemd -u nikhom --hp /home/nikhom  //tell linux to automatically run pm2 as "pm2 save" at restart
 - pm2 start --name easyio main.js  //create for first time
 - pm2 ls                           //check pm2 status
-- pm2 save                         //save current runing in pm2 , it will run again when restart
+- pm2 save                         //save current runing in pm2 , it will automatically run when restart
 - pm2 stop easyio                  //stop easyio
 
 =============================================
@@ -142,6 +149,33 @@ Network Interface
 
 ==============================================
 NGINX 
+at server
+- install
+  #yum install -y epel-release
+  #yum -y install nginx 
+  
+  #sudo apt-get install nginx
+  #sudo apt-get remove --purge nginx*   //to clearly remove nginx
+  
+- run nginx 
+  #systemctl start nginx
+  or 
+  #service start nginx
+  
+- Auto run nginx when restart 
+  #systemctl enable nginx 
+  or
+  $ sudo update-rc.d -n  nginx defaults
+
+===============================================
+/etc/nginx/nginx.conf
+Nginx can server many server {} by config them in  .conf
+
+http {
+  include /etc/nginx/conf.d/*.conf;    
+  //this line show all config for many server can be added this folder with .conf
+  
+}
 
 
 
