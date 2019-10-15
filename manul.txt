@@ -177,7 +177,28 @@ http {
   
 }
 
+================================================
+/etc/nginx/conf.d/nanogram.io.conf
 
+- to setup config file for our nanogram.io server
+
+server {
+  listen 80;
+  listen [::]:80;
+  server_name 
+  
+  location /{
+  }
+  
+  error_page 404/404.html;
+    location =/40x.html{
+  }
+  
+  error_page 500 502 503 504 /50x.html;
+    location =/50x.html{
+  }
+
+}
 
 
 
