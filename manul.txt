@@ -1,0 +1,76 @@
+//https://www.youtube.com/watch?v=1OU5ngq-WyM&list=PLQlWzK5tU-gDyxC1JTpyC2avvJlt3hrIh&index=1
+//Juriy Bura
+cloud service
+  amazon, google, azure ==> best service for big project, high price, multiserver
+
+Iaas 
+  digitalOcean, Linode, Amazon Lightsail ==> best for small-medium project,multi server, low price
+
+Paas
+  heroku, nodejitsu, ==> best for study , small node server project.
+
+============================================
+Node application
+from ==> https://github.com/Juriy/easyio   //web socket nodejs
+============================================
+Digital Ocean
+- sign up (credit card)
+- create a droplet        
+  //DigitalOcean (get $10 credits) https://m.do.co/c/e79071ae6b49  ||  Sample app: 
+  (10$/month, ssh key at $~/.ssh/id_rsa.pub ,os, one-click-app, server-location, host-name 4 droplet )
+
+============================================
+linux on server
+- log in to server
+  $ssh root@188.166.228.208
+- update/upgrade linux
+  $yum -y update
+- install linux-package
+  $yum -y groupinstall "Development Tools"
+  $yum -y install vim net-tools
+- install node js 
+  ..... see nodejs website
+  $node -v
+  $npm -v
+- install yarn (if need)
+  $sudo yum -y install yarn
+  #yarn --version
+
+  add a normal user
+- #adduser nikhom
+- #sudo su -nikhom
+- $whoami
+- $mkdir .ssh
+- chmod 700 .ssh
+- touch .ssh/authorized_keys
+- chmod 600 .ssh/authorized_keys
+  //copy-past public_key from local machine ~/.ssh/id_rsa.pub to "server" ./ssh/authorized_keys
+- log in to server with nikhom 
+  $ssh nikhom@188.166.228.208
+
+  add a root user (if need)
+  #adduser rootadmin1
+  #usermod -aG wheel rootadmin1
+
+=============================================
+npm/yarn dependency on server
+- #npm install -g pm2 http-server
+
+=============================================
+scp project to from local to server 
+- 
+
+
+
+
+
+
+
+  
+  
+  
+
+  
+
+
+
