@@ -51,14 +51,49 @@ linux on server
   add a root user (if need)
   #adduser rootadmin1
   #usermod -aG wheel rootadmin1
+  
+=============================================
+linux command
+- shutdown -r now     //to shut down & restart linux
 
 =============================================
 npm/yarn dependency on server
 - #npm install -g pm2 http-server
 
 =============================================
-scp project to from local to server 
-- 
+pm2 command
+- pm2 startup systemd -u nikhom --hp /home/nikhom     //tell linux to run pm2 as pm2 save at restart
+- pm2 start --name easyio main.js  //create for first time
+- pm2 ls                           //check pm2 status
+- pm2 save                         //save current runing in pm2 , it will run again when restart
+- pm2 stop easyio                  //stop easyio
+
+=============================================
+script for transfer project to from local to server 
+- $touch deploy.sh
+
+#!bin/bash
+tar czf easyio.tar.gz main.js package.json yarn.lock public LICENSE
+scp easyiotar.gz nikhom@188.166.228.208:~
+rm easyio.tar.gz
+
+ssh nikhom@188.166.228.208 <<'ENDSSH'
+pm2 stop easyio
+rm -rf easyio
+mkdir easyio
+tar xf easyio.tar.gz -C easyio 
+rm easyio.tar.gz
+cd easyio
+npm install
+pm2 start easyio
+ENDSSH
+
+- $./deploy.sh
+==============================================
+
+
+
+
 
 
 
