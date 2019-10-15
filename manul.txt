@@ -18,15 +18,18 @@ Digital Ocean
 - create a droplet        
   //DigitalOcean (get $10 credits) https://m.do.co/c/e79071ae6b49  ||  Sample app: 
   (10$/month, ssh key at $~/.ssh/id_rsa.pub ,os, one-click-app, server-location, host-name 4 droplet )
-  
+
+
 ============================================
 create DNS
 godady.com, HostGator, Namecheap, eNom, Gandi, 1&1  etc...
 - nanogram.io
 
-DNS record at digital ocean
+
+- at Networking od digitalOcean 
+  assign DNS record 
 Hostname        value
-nanogram.io     direct to 188.166.228.208
+nanogram.io     direct to nanogram.io   (188.166.228.208)
 
 ============================================
 linux on server
@@ -378,10 +381,56 @@ server {
 }  
  
   
+=======================================================
+renew ssl certificate after expire
+#systemctl stop nginx
+#certbot renew
+
+it will update in
+/etc/letsencrypt/live/nanogram.io/fullchain.pem
+
+=========================================================
+"Zero Down Time with Build Server" 
+
+Better to have "Build Server" in addition to "App Server"
+
+Better to update code on Github and auto update code on build server
+
+local machine ==> Github ==> Build Server + npm install == Jenkins (java) ==> App Server
+
+=========================================================
+Create "Build Server"
+
+- create a droplet in digitalOcean
+https://www.digitalocean.com/?refcode=e79071ae6b49&utm_campaign=Referral_Invite&utm_medium=Referral_Program&utm_source=CopyPaste                                     
+'nano-build'  host-name of droplet
+157.2.21.22   ip-address of droplet 
+ 
+- create DNS   
+  build.nanogram.io
+
+at Networking on digitalOcean  assign DNS record 
+
+Hostname        value
+build.nanogram.io     direct to nano-build   (157.2.21.22)
+
+$ssh root@build.nanogram.io   
+
+update & upgrade os
+restart server 
+  #shutdown -r now 
+check every work fine need restart or not with 
+  #needs-restarting -r
+install package
+  #yum -y install gcc-c++ wget make net-tools vim git epel-release 
+install node.js
+  #curl --silent --location https://rpm.nodesouce.com/setup_12.x | bash
+  #yum -y install nodejs 
+  #node -v
   
   
-
   
-
-
+  
+  
+  
 
