@@ -18,6 +18,15 @@ Digital Ocean
 - create a droplet        
   //DigitalOcean (get $10 credits) https://m.do.co/c/e79071ae6b49  ||  Sample app: 
   (10$/month, ssh key at $~/.ssh/id_rsa.pub ,os, one-click-app, server-location, host-name 4 droplet )
+  
+============================================
+create DNS
+godady.com, HostGator, Namecheap, eNom, Gandi, 1&1  etc...
+- nanogram.io
+
+DNS record at digital ocean
+Hostname        value
+nanogram.io     direct to 188.166.228.208
 
 ============================================
 linux on server
@@ -54,7 +63,10 @@ linux on server
   
 =============================================
 linux command
-- shutdown -r now     //to shut down & restart linux
+- $shutdown -r now     //to shut down & restart linux
+- $ping nanogram.io or $ping 188.166.228.208
+- $curl nanogram.io:8181 //to access to application in this interface & port 
+- $netstat -tln        //tcp listenning numberOfip-address
 
 =============================================
 npm/yarn dependency on server
@@ -69,7 +81,13 @@ pm2 command
 - pm2 stop easyio                  //stop easyio
 
 =============================================
+nodejs command
+const hostname = process.argv[2] || null       //null = default interface or 0.0.0.0
+server.listen(port,hostname,(err)=>{})
+
+=============================================
 script for transfer project to from local to server 
+at local 
 - $touch deploy.sh
 
 #!bin/bash
@@ -88,8 +106,24 @@ npm install
 pm2 start easyio
 ENDSSH
 
+at local 
 - $./deploy.sh
 ==============================================
+Network Interface
+- each machine have many interface (ip-address) to connect many network
+
+
+- 0.0.0.0   ==> public interface every network can access application which use this interface
+                this is default interface for node.js 
+                server.listen(port,()=>{})  === server.listen(port,0.0.0.0,()=>{}) 
+
+- 127.0.0.01 ==> localhost
+- 192.168.1.104 ==> normal interface in home network
+- digital also provide private interface for internal server-server of digital ocean
+  for quick performance 
+
+==============================================
+NGINX 
 
 
 
