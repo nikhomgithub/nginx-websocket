@@ -4,24 +4,28 @@ const sock = io();
 //a();
 
 //========================
+//Server                                             Client
+//io.on('connection')                           <--- sock.on('connect') 
+//                                                   every 1000ms 
+//sock.on('heartbeat')       <---{timestapm:now}<--- sock.emit('hearbeat')                                  
+//sock.emit('heatbeat')      --->{nodeName:name}---> sock.on('heartbeat') cal roundtrip time,append ul  
+
 //Part 1
 //setInterval(sendHeartbeat, 1000);   
-//Step 1
-
+//Step 1                   ---connect to server
 sock.on('connect', () => {
   console.log('socket.io connected');
 });
-
+//==========================
+//Step 2                   ---send heartbeat (timestamp) to server every 1000ms
 const sendHeartbeat = () => {    
   sock.emit('heartbeat', {    
-    timestamp: Date.now()     //this payload from client     
+    timestamp: Date.now()  //payload=timestamp     
   });
 };
 
-//Step 2
 setInterval(sendHeartbeat, 1000);                     
-
-
+//==========================
 const append = (parentId, text) => {
   const parent = document.getElementById(parentId);
   const item = document.createElement('li');
@@ -39,8 +43,6 @@ const onHeartbeat = (payload) => {   //payload from client (timestamp) -> server
 
 //Step 3
 sock.on('heartbeat', onHeartbeat);
-
-
 //========================
 //========================
 //Part 2
