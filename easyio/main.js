@@ -35,16 +35,24 @@ app.get('/api/file', (req, res) => {
     });
   });
 });
-                                  //sock come from client
-io.on('connection', (sock) => {   // 3  sock = instance of connection
-  console.log('Client connected');
+//Server                                             Client
+//io.on('connection')                           <--- sock.on('connect') 
+//                                                   every 1000ms 
+//sock.on('heartbeat')       <---{timestapm:now}<--- sock.emit('hearbeat')                                  
+//sock.emit('heatbeat')      --->{nodeName:name}---> sock.on('heartbeat') cal roundtrip time,append ul     
 
-  sock.on('heartbeat', (payload) => {   //payload from client
-    payload.nodeName = name;            //add payload.nodeName
-    sock.emit('heartbeat', payload);
+//step I 
+//wait for client
+io.on('connection', (sock) => {         //open for connection
+  // 3  sock = connection from client
+  console.log('Client connected');
+                                        // Server 
+  sock.on('heartbeat', (payload) => {   // get heartbeat from client, payload ={timestamp:now
+    payload.nodeName = name;            // add payload.nodeName      
+    sock.emit('heartbeat', payload);    // emit to client  , payload={...payload,nodeName:name}
   });
 
-  sock.on('disconnect', () => {
+  sock.on('disconnect', () => {          // disconnect 
     console.log('Socket Disconnected');
   });
 });
